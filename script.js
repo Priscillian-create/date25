@@ -1,3 +1,26 @@
+// Initialize Supabase
+const supabase = window.supabase.createClient(
+  'https://qgayglybnnrhobcvftrs.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnYXlnbHlibm5yaG9iY3ZmdHJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2ODQ5ODMsImV4cCI6MjA3ODI2MDk4M30.dqiEe-v1cro5N4tuawu7Y1x5klSyjINsLHd9-V40QjQ'
+  
+);
+
+const DISABLE_LOGS = true;
+if (DISABLE_LOGS && window.console) {
+  try { console.log = function(){}; } catch (e) {}
+  try { console.warn = function(){}; } catch (e) {}
+  try { console.error = function(){}; } catch (e) {}
+}
+
+// App configuration
+window.sections = Array.isArray(window.sections) ? window.sections : ['grill', 'wholesale', 'building', 'food', 'pos_mart', 'pos1'];
+const sections = window.sections;
+const sectionNames = {
+  'grill': 'Grill', 'wholesale': 'Wholesale', 
+  'building': 'Building Material', 'food': 'Food Supplies',
+  'pos_mart': 'POS (MART)', 'pos1': 'POS1'
+};
+
 // Initialize data structures
 const dataStores = {
   inventory: {}, carts: {}, salesData: {}, purchaseData: {}, 

@@ -1,25 +1,3 @@
-// Initialize Supabase
-const supabase = window.supabase.createClient(
-  'https://qgayglybnnrhobcvftrs.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnYXlnbHlibm5yaG9iY3ZmdHJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2ODQ5ODMsImV4cCI6MjA3ODI2MDk4M30.dqiEe-v1cro5N4tuawu7Y1x5klSyjINsLHd9-V40QjQ'
-  
-);
-
-const DISABLE_LOGS = true;
-if (DISABLE_LOGS && window.console) {
-  try { console.log = function(){}; } catch (e) {}
-  try { console.warn = function(){}; } catch (e) {}
-  try { console.error = function(){}; } catch (e) {}
-}
-
-// App configuration
-const sections = ['grill', 'wholesale', 'building', 'food', 'pos_mart', 'pos1'];
-const sectionNames = {
-  'grill': 'Grill', 'wholesale': 'Wholesale', 
-  'building': 'Building Material', 'food': 'Food Supplies',
-  'pos_mart': 'POS (MART)', 'pos1': 'POS1'
-};
-
 // Initialize data structures
 const dataStores = {
   inventory: {}, carts: {}, salesData: {}, purchaseData: {}, 
@@ -1860,13 +1838,9 @@ const uiManager = {
     if (modal) modal.classList.remove('active');
   },
   updateTransactionAnalytics: (section) => {
-    const stats = dataStores.transactionData[section];
     const totalVolumeEl = document.getElementById(`${section}-txn-total-volume`);
     const totalChargesEl = document.getElementById(`${section}-txn-total-charges`);
     const totalTransactionsEl = document.getElementById(`${section}-txn-total-transactions`);
-    if (totalVolumeEl) totalVolumeEl.textContent = `₦${Number(stats.totalVolume).toFixed(2)}`;
-    if (totalChargesEl) totalChargesEl.textContent = `₦${Number(stats.totalCharges).toFixed(2)}`;
-    if (totalTransactionsEl) totalTransactionsEl.textContent = `${stats.totalTransactions}`;
     const selected = selectedDate[section] || utils.getTodayDate();
     const opening = dataStores.balances[section][selected] || { openingCash: 0, openingPos: 0 };
     let cashDelta = 0;
@@ -1908,6 +1882,9 @@ const uiManager = {
         }
       }
     });
+    if (totalVolumeEl) totalVolumeEl.textContent = `₦${Number(volumeToday).toFixed(2)}`;
+    if (totalChargesEl) totalChargesEl.textContent = `₦${Number(chargesToday).toFixed(2)}`;
+    if (totalTransactionsEl) totalTransactionsEl.textContent = `${transactionsToday}`;
     const profitToday = chargesToday - machineChargesTotal;
     const machineChargesTodayEl = document.getElementById(`${section}-txn-machine-charges-today`);
     const profitTodayEl = document.getElementById(`${section}-txn-profit-today`);

@@ -2999,7 +2999,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const appEl = document.getElementById('mainApp');
   if (loginEl) loginEl.style.display = 'flex';
   if (appEl) appEl.style.display = 'none';
-  try { supabase.auth.signOut(); } catch (e) {}
+  try { supabase.auth.signOut({ scope: 'local' }); } catch (e) {}
   // Preload local caches for faster post-login init (no UI init yet)
   dataManager.loadDataFromLocalStorage();
   dataManager.applyPendingDeletionsToLocal();
@@ -3055,7 +3055,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', function() {
-      supabase.auth.signOut();
+      supabase.auth.signOut({ scope: 'local' });
     });
   }
 

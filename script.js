@@ -2093,6 +2093,7 @@ const uiManager = {
           <th>Phone</th>
           <th>Reference</th>
           <th>Date</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -2100,6 +2101,7 @@ const uiManager = {
     const tbody = table.querySelector('tbody');
     filtered.forEach(tx => {
       const tr = document.createElement('tr');
+      tr.setAttribute('data-id', tx.id);
       tr.innerHTML = `
         <td>${tx.type}</td>
         <td>₦${Number(tx.amount).toFixed(2)}</td>
@@ -2108,6 +2110,7 @@ const uiManager = {
         <td>${tx.customer_phone || '-'}</td>
         <td>${tx.reference || '-'}</td>
         <td>${utils.formatDate(tx.timestamp)}</td>
+        <td><button class="action-btn delete js-transaction-delete"><i class="fas fa-trash"></i></button></td>
       `;
       tbody.appendChild(tr);
     });
@@ -2406,6 +2409,35 @@ const transactionManager = {
       console.error('Error recording transaction:', error);
       utils.showNotification('Error recording transaction', 'error');
     });
+  },
+  deleteTransaction: (section, id) => {
+    if (!id) return;
+    const online = navigator.onLine && !String(id).startsWith('offline_');
+    if (online) {
+      dataManager.ensureOwnershipAndDelete('transactions', id)
+        .then(() => {
+          dataStores.transactions[section] = (dataStores.transactions[section] || []).filter(tx => String(tx.id) !== String(id));
+          utils.saveToLocalStorage(`transactions_${section}`, dataStores.transactions[section]);
+          uiManager.loadTransactionsTable(section);
+          uiManager.updateTransactionAnalytics(section);
+          utils.showNotification('Transaction deleted successfully', 'success');
+        })
+        .catch(error => {
+          console.error('Error deleting transaction:', error);
+          utils.showNotification('Error deleting transaction. Please check your connection or permissions.', 'error');
+        });
+    } else {
+      const pending = utils.loadFromLocalStorage('pendingChanges', {});
+      pending.transactions = pending.transactions || {};
+      pending.transactions.deleteIds = pending.transactions.deleteIds || [];
+      if (!String(id).startsWith('offline_')) pending.transactions.deleteIds.push(id);
+      utils.saveToLocalStorage('pendingChanges', pending);
+      dataStores.transactions[section] = (dataStores.transactions[section] || []).filter(tx => String(tx.id) !== String(id));
+      utils.saveToLocalStorage(`transactions_${section}`, dataStores.transactions[section]);
+      uiManager.loadTransactionsTable(section);
+      uiManager.updateTransactionAnalytics(section);
+      utils.showNotification('Transaction removed locally', 'success');
+    }
   }
 };
 
@@ -3241,6 +3273,20 @@ function setupEventDelegation() {
           supplierManager.deleteSupplier(section, itemId);
         } else {
           supplierManager.editSupplier(section, itemId);
+        }
+      }
+    });
+  });
+
+  document.querySelectorAll('.js-transactions-container').forEach(container => {
+    container.addEventListener('click', (e) => {
+      const section = container.getAttribute('data-section');
+      if (e.target.closest('.action-btn')) {
+        const btn = e.target.closest('.action-btn');
+        const row = btn.closest('tr');
+        const txId = row.getAttribute('data-id');
+        if (btn.classList.contains('delete')) {
+          transactionManager.deleteTransaction(section, txId);
         }
       }
     });

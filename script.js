@@ -1,15 +1,14 @@
 // Initialize Supabase
 const supabase = window.supabase.createClient(
   'https://qgayglybnnrhobcvftrs.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnYXlnbHlibm5yaG9iY3ZmdHJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2ODQ5ODMsImV4cCI6MjA3ODI2MDk4M30.dqiEe-v1cro5N4tuawu7Y1x5klSyjINsLHd9-V40QjQ'
-  
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFnYXlnbHlibm5yaG9iY3ZmdHJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2ODQ5ODMsImV4cCI6MjA3ODI2MDk4M30.dqiEe-v1cro5N4tuawu7Y1x5klSyjINsLHd9-V40QjQ',
+  { auth: { persistSession: true, autoRefreshToken: true } }
 );
 
 const DISABLE_LOGS = true;
 if (DISABLE_LOGS && window.console) {
   try { console.log = function(){}; } catch (e) {}
   try { console.warn = function(){}; } catch (e) {}
-  try { console.error = function(){}; } catch (e) {}
 }
 
 // App configuration
@@ -3025,6 +3024,21 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(({ data, error }) => {
           if (error) {
             if (errorElement) errorElement.textContent = error.message;
+            if (loginBtn) {
+              loginBtn.disabled = false;
+              loginBtn.textContent = 'Sign In';
+            }
+            return;
+          }
+          if (data && data.user) {
+            currentUser = data.user;
+            if (loginEl) loginEl.style.display = 'none';
+            if (appEl) appEl.style.display = 'block';
+            uiManager.updateUserInfo(data.user);
+            dataManager.loadDataFromSupabase();
+            window.addEventListener('online', uiManager.handleOnlineStatus);
+            window.addEventListener('offline', uiManager.handleOfflineStatus);
+            uiManager.initializeApp();
             if (loginBtn) {
               loginBtn.disabled = false;
               loginBtn.textContent = 'Sign In';
